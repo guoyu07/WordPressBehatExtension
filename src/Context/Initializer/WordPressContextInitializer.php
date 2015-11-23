@@ -92,21 +92,30 @@ class WordPressContextInitializer implements ContextInitializer
      */
     public function installFileFixtures()
     {
-        $finder = new Finder();
         $fs = new Filesystem();
-        $finder->files()->in($this->wordpressParams['path'])->depth('== 0')->name('wp-config-sample.php');
-        foreach ($finder as $file) {
-            $configContent =
-                str_replace(array(
-                    "'DB_NAME', 'database_name_here'",
-                    "'DB_USER', 'username_here'",
-                    "'DB_PASSWORD', 'password_here'"
-                ), array(
-                    sprintf("'DB_NAME', '%s'", $this->wordpressParams['connection']['db']),
-                    sprintf("'DB_USER', '%s'", $this->wordpressParams['connection']['username']),
-                    sprintf("'DB_PASSWORD', '%s'", $this->wordpressParams['connection']['password']),
-                ), $file->getContents());
-            $fs->dumpFile($file->getPath() . '/wp-config.php', $configContent);
+        if($this->wordpressParams['wp_config']) {
+            if(file_exists(realpath($this->wordpressParams['wp_config']))) {
+                $fs->copy(
+                    realpath($this->wordpressParams['wp_config']),
+                    $this->wordpressParams['path'] . DIRECTORY_SEPARATOR . 'wp-config.php'
+                );
+            }
+        } else {
+            $finder = new Finder();
+            $finder->files()->in($this->wordpressParams['path'])->depth('== 0')->name('wp-config-sample.php');
+            foreach ($finder as $file) {
+                $configContent =
+                    str_replace(array(
+                        "'DB_NAME', 'database_name_here'",
+                        "'DB_USER', 'username_here'",
+                        "'DB_PASSWORD', 'password_here'"
+                    ), array(
+                        sprintf("'DB_NAME', '%s'", $this->wordpressParams['connection']['db']),
+                        sprintf("'DB_USER', '%s'", $this->wordpressParams['connection']['username']),
+                        sprintf("'DB_PASSWORD', '%s'", $this->wordpressParams['connection']['password']),
+                    ), $file->getContents());
+                $fs->dumpFile($file->getPath() . '/wp-config.php', $configContent);
+            }
         }
 
         if (isset($this->wordpressParams['symlink']['from']) && isset($this->wordpressParams['symlink']['to'])) {
