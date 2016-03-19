@@ -127,7 +127,7 @@ class WordPressContextInitializer implements ContextInitializer
                 $from = $this->basePath . DIRECTORY_SEPARATOR . $from;
             }
             if ($fs->exists($this->wordpressParams['symlink']['from'])) {
-                $fs->symlink($from, $this->wordpressParams['symlink']['to']);
+                $fs->symlink($from, $this->wordpressParams['symlink']['to'], true);
             }
         }
     }
